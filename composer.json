@@ -4,7 +4,6 @@
     "type": "library",
     "require": {
         "php": "^8.1",
-        "laravel/laravel": "^10.10"
     },
     "license": "MIT",
     "autoload": {

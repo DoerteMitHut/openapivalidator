@@ -1,0 +1,22 @@
+{
+    "name": "doertemithut/openapi_validator",
+    "description": "Checking your laravel app for compliance with an openAPI specification",
+    "type": "library",
+    "require": {
+        "php": "8",
+        "laravel/laravel": "10.10"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Doertemithut\\OpenapiValidator\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Niklas Heyne",
+            "email": "niklas.heyne@mailbox.org"
+        }
+    ],
+    "minimum-stability": "dev"
+}

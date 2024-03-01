@@ -8,7 +8,7 @@ class OpenApiValidatorServiceProvider extends ServiceProvider {
 
     public function boot(\Illuminate\Routing\Router $router) {
         $this->commands([
-            \doertemithut\openapivalidator\Commands\FooCommand ::class,
+            \doertemithut\openapivalidator\ValidateAPI ::class,
         ]);
     }
 }

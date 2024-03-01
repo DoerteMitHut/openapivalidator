@@ -138,8 +138,11 @@ class ValidateAPI extends Command
             $this->lineOut("<bg=red> no openAPI configuration file</>", $indentLevel);
             return;
         }
-        echo $openAPIFile;
         $specs = json_decode($openAPIFile, true);
+        if(!$specs){
+            $this->lineOut("<bg=red> openAPI configuration file could not be decoded</>", $indentLevel);
+            return;
+        }
         if(!array_key_exists("paths", $specs)){
             $this->lineOut("<bg=red> no 'paths' in openAPI configuration file</>", $indentLevel);
             return;
@@ -212,6 +215,11 @@ class ValidateAPI extends Command
             }
             $indentLevel--;
         }
+        
+        foreach ($specs['components']['schemas'] as $schemaIdentifier => $schema) {
+            $this->lineOut(sprintf("<bg=gray>%s</>",$schemaIdentifier), $indentLevel);            
+        }
+        
         $indentLevel=0;
         $this->lineOut(sprintf('Finished: <fg=red>%d</> errors | <fg=yellow>%d</> warnings',$nErrors,$nWarnings, $indentLevel));
     }

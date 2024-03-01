@@ -41,7 +41,7 @@ class ValidateAPI extends Command
         }
     } 
 
-    private function processMatches($matches){
+    private function processRouteMatches($matches){
         return[
             "httpMethod" => $matches[1],
             "route" => $matches[2],

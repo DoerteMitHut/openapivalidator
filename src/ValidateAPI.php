@@ -51,7 +51,8 @@ class ValidateAPI extends Command
     }
 
     private function enterRouteBlock($index){
-
+        self::$inBlock = true;
+        $this->lineOut('<bg=yellow> starting Route Block</>');
     }
 
     private function exitRouteBlock($index){
@@ -88,12 +89,9 @@ class ValidateAPI extends Command
                 if (preg_match(ROUTE_DEFINITION_PATTERN, $line, $matches)) {
                     // line matches route definition
                     if (!self::$inBlock) {
-                        self::$inBlock = true;
-                        $this->lineOut('<bg=yellow> starting Route Block</>', $indentLevel);
+                        $this->enterRouteBlock($lineIndex);
                     }
-
                     $route_definition_line = $this->processRouteMatches($matches);
-
                     array_push(
                         $definedRoutes, 
                         $route_definition_line['route']);
@@ -118,7 +116,6 @@ class ValidateAPI extends Command
                     continue;
                 } 
                 else {
-                    
                     if (self::$inBlock && trim($line) != "") {
                         $this->exitRouteBlock($lineIndex);
                     }
@@ -130,20 +127,8 @@ class ValidateAPI extends Command
                 }
                 $lineIndex++;
             }
-
             fclose($apifile);
         }
-
-        // find controller files
-        $controllerFiles = scandir("./app/Http/Controllers");
-        foreach ($controllerFiles as $controllerFile) {
-            if (str_ends_with($controllerFile, 'Controller.php')) {
-                $this->lineOut('<bg=blue> CONTROLLER </> ' . $controllerFile, $indentLevel);
-            }
-        }
-
-
-
 
         // Read the openAPI JSON file  
         $openAPIFile = file_get_contents('./config/api_spec.json');
@@ -170,6 +155,14 @@ class ValidateAPI extends Command
                             } else {
                                 $this->lineOut( sprintf('<bg=red>CONTROLLER CLASS MISSING</> %s', $specControllerClass, $indentLevel));;
                             }
+                            
+                            if (($definedHandlers[sprintf('%s|%s',$httpMethod,$path)]["controllerClass"] ?? "") == $specControllerClass) {
+                                $this->lineOut( sprintf('<bg=green>CONTROLLER CLASS SET AS HANDLER</> %s', $specControllerClass, $indentLevel));;
+                            } else {
+                                $this->lineOut( sprintf('<bg=red>CONTROLLER CLASS NOT SET AS HANDLER</> %s', $specControllerClass, $indentLevel));;
+                            }
+
+
                             if (array_key_exists('x-controllerMethod', $actionspec)) {
                                 $indentLevel++;
                                 $specControllerMethod = $actionspec['x-controllerMethod'];
@@ -177,6 +170,11 @@ class ValidateAPI extends Command
                                     $this->lineOut( sprintf('<bg=green>CONTROLLER CLASS HAS METHOD</> %s', $specControllerMethod, $indentLevel));;
                                 } else {
                                     $this->lineOut( sprintf('<bg=red>CONTROLLER MISSES METHOD</> %s', $specControllerMethod, $indentLevel));;
+                                }
+                                if (($definedHandlers[sprintf('%s|%s',$httpMethod,$path)]["controllerMethod"] ?? "") == $specControllerMethod) {
+                                    $this->lineOut( sprintf('<bg=green>CONTROLLER METHOD SET AS HANDLER</> %s', $specControllerMethod, $indentLevel));;
+                                } else {
+                                    $this->lineOut( sprintf('<bg=red>CONTROLLER METHOD NOT SET AS HANDLER</> %s', $specControllerMethod, $indentLevel));;
                                 }
                                 $indentLevel--;
                             }else{

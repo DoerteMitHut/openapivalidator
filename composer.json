@@ -1,5 +1,5 @@
 {
-    "name": "doertemithut/openapi_validator",
+    "name": "doertemithut/openapivalidator",
     "description": "Checking your laravel app for compliance with an openAPI specification",
     "type": "library",
     "require": {
@@ -9,7 +9,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Doertemithut\\OpenapiValidator\\": "src/"
+            "doertemithut\\OpenapiValidator\\": "src/"
         }
     },
     "authors": [

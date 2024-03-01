@@ -133,8 +133,16 @@ class ValidateAPI extends Command
         // Read the openAPI JSON file  
         $openAPIFile = file_get_contents('./config/api_spec.json');
         // var_dump($openAPIFile);
-        // Decode the JSON file 
+        // Decode the JSON file
+        if(!$openAPIFile){
+            $this->lineOut("<bg=red> no openAPI configuration file</>", $indentLevel);
+            return;
+        } 
         $specs = json_decode($openAPIFile, true);
+        if(!array_key_exists("paths", $specs)){
+            $this->lineOut("<bg=red> no 'paths' in openAPI configuration file</>", $indentLevel);
+            return;
+        }
         // var_dump($specs);
         foreach ($specs['paths'] as $path => $pathspec) {
             $indentLevel = 0;

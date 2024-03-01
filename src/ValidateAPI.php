@@ -137,7 +137,8 @@ class ValidateAPI extends Command
         if(!$openAPIFile){
             $this->lineOut("<bg=red> no openAPI configuration file</>", $indentLevel);
             return;
-        } 
+        }
+        echo $openAPIFile;
         $specs = json_decode($openAPIFile, true);
         if(!array_key_exists("paths", $specs)){
             $this->lineOut("<bg=red> no 'paths' in openAPI configuration file</>", $indentLevel);

@@ -162,6 +162,6 @@ class ValidateAPI extends Command
             $indentLevel--;
         }
         $indentLevel=0;
-        $this->line($this->indent($indentLevel,sprintf('<fg=red>%d</> errors | <fg=yellow>%d</> warnings',$nErrors,$nWarnings)));
+        $this->line($this->indent($indentLevel,sprintf('Finished: <fg=red>%d</> errors | <fg=yellow>%d</> warnings',$nErrors,$nWarnings)));
     }
 }

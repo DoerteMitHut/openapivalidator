@@ -89,7 +89,7 @@ class ValidateAPI extends Command
                     // line matches route definition
                     if (!self::$inBlock) {
                         self::$inBlock = true;
-                        $this->lineOut($indentLevel, '<bg=yellow> starting Route Block</>');
+                        $this->lineOut('<bg=yellow> starting Route Block</>', $indentLevel);
                     }
 
                     $route_definition_line = $this->processRouteMatches($matches);
@@ -125,7 +125,7 @@ class ValidateAPI extends Command
                 }
 
                 if (preg_match(CONTROLLER_USE_PATTERN, $line, $matches)) {
-                    $this->lineOut($indentLevel, '<bg=blue> USE </> ' . $matches[1]);
+                    $this->lineOut('<bg=blue> USE </> ' . $matches[1], $indentLevel);
                     array_push($usedControllers, $matches[1]);
                 }
                 $lineIndex++;
@@ -138,7 +138,7 @@ class ValidateAPI extends Command
         $controllerFiles = scandir("./app/Http/Controllers");
         foreach ($controllerFiles as $controllerFile) {
             if (str_ends_with($controllerFile, 'Controller.php')) {
-                $this->lineOut($indentLevel, '<bg=blue> CONTROLLER </> ' . $controllerFile);
+                $this->lineOut('<bg=blue> CONTROLLER </> ' . $controllerFile, $indentLevel);
             }
         }
 

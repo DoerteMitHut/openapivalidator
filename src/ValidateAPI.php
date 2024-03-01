@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace doertemithut\openapivalidator;
 
 use Illuminate\Console\Command;
 use App\Http\Controllers;

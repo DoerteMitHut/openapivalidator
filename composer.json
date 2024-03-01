@@ -11,6 +11,13 @@
             "doertemithut\\openapivalidator\\": "src/"
         }
     },
+    "extra": {
+        "laravel": {
+          "providers": [
+            "doertemithut\\openapivalidator\\OpenApiValidatorServiceProvider"
+          ]
+        }
+      },
     "authors": [
         {
             "name": "Niklas Heyne",

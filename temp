@@ -1,0 +1,7 @@
+    "extra": {
+        "laravel": {
+          "providers": [
+            "doertemithut\\openapivalidator\\OpenApiValidatorServiceProvider"
+          ]
+        }
+      },

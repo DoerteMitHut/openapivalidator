@@ -14,7 +14,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "DoerteMitHut\\OpenAPIValidator\\OpenApiValidatorServiceProvider"
+                "doertemithut\\openapivalidator\\OpenApiValidatorServiceProvider"
             ]
         }
     },

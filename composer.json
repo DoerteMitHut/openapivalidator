@@ -13,11 +13,11 @@
     },
     "extra": {
         "laravel": {
-          "providers": [
-            "doertemithut\\openapivalidator\\OpenApiValidatorServiceProvider"
-          ]
+            "providers": [
+                "DoerteMitHut\\OpenAPIValidator\\OpenApiValidatorServiceProvider"
+            ]
         }
-      },
+    },
     "authors": [
         {
             "name": "Niklas Heyne",

@@ -1,5 +1,5 @@
 <?php
-namespace doertemithut\openapivalidator;
+namespace DoerteMitHut\OpenAPIValidator;
 
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;

@@ -1,6 +1,6 @@
 <?php
 
-namespace doertemithut\openapivalidator;
+namespace DoerteMitHut\OpenAPIValidator;
 
 use Illuminate\Console\Command;
 use App\Http\Controllers;

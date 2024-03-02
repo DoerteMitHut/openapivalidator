@@ -4,6 +4,7 @@ namespace doertemithut\openapivalidator;
 
 use Illuminate\Console\Command;
 use App\Http\Controllers;
+use App\Models;
 
 class ValidateAPI extends Command
 {
@@ -29,20 +30,23 @@ class ValidateAPI extends Command
         return str_repeat('  ', $indentLevel) . $value;
     }
 
-    private function lineOut($value,$indent=0){
+    private function lineOut($value, $indent = 0)
+    {
         $this->line($this->indent($indent, $value));
     }
 
-    private function pushToArray(&$array, $key, $value){
+    private function pushToArray(&$array, $key, $value)
+    {
         if (!array_key_exists($key, $array)) {
             $array[$key] = [$value];
         } else {
             array_push($array[$key], $value);
         }
-    } 
+    }
 
-    private function processRouteMatches($matches){
-        return[
+    private function processRouteMatches($matches)
+    {
+        return [
             "httpMethod" => $matches[1],
             "route" => $matches[2],
             "controller" => $matches[3],
@@ -50,30 +54,33 @@ class ValidateAPI extends Command
         ];
     }
 
-    private function enterRouteBlock($index){
+    private function enterRouteBlock($index)
+    {
         self::$inBlock = true;
         $this->lineOut('<bg=yellow> starting Route Block</>');
     }
 
-    private function exitRouteBlock($index){
+    private function exitRouteBlock($index)
+    {
         self::$inBlock = false;
         $this->lineOut('<bg=yellow> ending Route Block</>');
     }
-    
+
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        define("CONTROLLER_USE_PATTERN","{use App\\\Http\\\Controllers\\\(.*Controller)}");
+        define("CONTROLLER_USE_PATTERN", "{use App\\\Http\\\Controllers\\\(.*Controller)}");
         define("ROUTE_DEFINITION_PATTERN", "{Route::(post|get|update|delete)\('([^']*)', \[([a-zA-Z]*)::class, '([^']*)'\]\);}");
         define("CONTROLLER_NAMESPACE_PREFIX", "App\\Http\\Controllers\\");
-        define("API_FILE_PATH","./routes/api.php");
+        define("MODEL_NAMESPACE_PREFIX", "App\\Models\\");
+        define("API_FILE_PATH", "./routes/api.php");
 
 
         $nErrors = 0;
         $nWarnings = 0;
-        
+
         $indentLevel = 0;
         $apifile = fopen(API_FILE_PATH, "r");
         $route_blocks = [];
@@ -93,29 +100,32 @@ class ValidateAPI extends Command
                     }
                     $route_definition_line = $this->processRouteMatches($matches);
                     array_push(
-                        $definedRoutes, 
-                        $route_definition_line['route']);
+                        $definedRoutes,
+                        $route_definition_line['route']
+                    );
                     array_push(
                         $usedControllers,
-                        $route_definition_line["controller"]);
+                        $route_definition_line["controller"]
+                    );
                     $this->pushToArray(
                         $definedActions,
                         $route_definition_line['route'],
-                        $route_definition_line["httpMethod"]);
+                        $route_definition_line["httpMethod"]
+                    );
                     $this->pushToArray(
                         $definedHandlers,
-                        sprintf('%s|%s',$route_definition_line["httpMethod"],$route_definition_line['route']),
+                        sprintf('%s|%s', $route_definition_line["httpMethod"], $route_definition_line['route']),
                         [
                             "controllerClass" => $route_definition_line["controller"],
                             "controllerMethod" => $route_definition_line["controllerMethod"]
-                        ]);
+                        ]
+                    );
 
                     $this->lineOut(sprintf('<bg=blue> ROUTE </> <bg=green> %s %s</>', $route_definition_line["httpMethod"], $route_definition_line['route'], $indentLevel));
-                    $this->lineOut('<bg=blue> CONTROLLER/METHOD </> ' . $route_definition_line["controller"] . " / " . $route_definition_line["controllerMethod"],$indentLevel);
+                    $this->lineOut('<bg=blue> CONTROLLER/METHOD </> ' . $route_definition_line["controller"] . " / " . $route_definition_line["controllerMethod"], $indentLevel);
 
                     continue;
-                } 
-                else {
+                } else {
                     if (self::$inBlock && trim($line) != "") {
                         $this->exitRouteBlock($lineIndex);
                     }
@@ -134,45 +144,45 @@ class ValidateAPI extends Command
         $openAPIFile = file_get_contents('./config/api_spec.json');
         // var_dump($openAPIFile);
         // Decode the JSON file
-        if(!$openAPIFile){
+        if (!$openAPIFile) {
             $this->lineOut("<bg=red> no openAPI configuration file</>", $indentLevel);
             return;
         }
         $specs = json_decode($openAPIFile, true);
-        if(!$specs){
+        if (!$specs) {
             $this->lineOut("<bg=red> openAPI configuration file could not be decoded</>", $indentLevel);
             return;
         }
-        if(!array_key_exists("paths", $specs)){
+        if (!array_key_exists("paths", $specs)) {
             $this->lineOut("<bg=red> no 'paths' in openAPI configuration file</>", $indentLevel);
             return;
         }
         // var_dump($specs);
         foreach ($specs['paths'] as $path => $pathspec) {
             $indentLevel = 0;
-            $this->lineOut( sprintf('<bg=gray>SPEC</> %s', $path, $indentLevel));
+            $this->lineOut(sprintf('<bg=gray>SPEC</> %s', $path, $indentLevel));
             $indentLevel++;
             if (in_array($path, $definedRoutes)) {
-                $this->lineOut( sprintf('<bg=green>ROUTE DEFINED</> %s', $path, $indentLevel));
+                $this->lineOut(sprintf('<bg=green>ROUTE DEFINED</> %s', $path, $indentLevel));
                 $indentLevel++;
                 foreach ($pathspec as $httpMethod => $actionspec) {
                     if (in_array($httpMethod, $definedActions[$path])) {
-                        $this->lineOut( sprintf('<bg=green>METHOD DEFINED</> %s %s', $httpMethod, $path, $indentLevel));
+                        $this->lineOut(sprintf('<bg=green>METHOD DEFINED</> %s %s', $httpMethod, $path, $indentLevel));
                         if (array_key_exists('x-controllerClass', $actionspec)) {
                             //method level
                             $indentLevel++;
                             $specControllerClass = $actionspec['x-controllerClass'];
-                            if (class_exists(CONTROLLER_NAMESPACE_PREFIX.$specControllerClass)) {
-                                $this->lineOut( sprintf('<bg=green>CONTROLLER CLASS EXISTS</> %s', $specControllerClass, $indentLevel));
+                            if (class_exists(CONTROLLER_NAMESPACE_PREFIX . $specControllerClass)) {
+                                $this->lineOut(sprintf('<bg=green>CONTROLLER CLASS EXISTS</> %s', $specControllerClass, $indentLevel));
                             } else {
-                                $this->lineOut( sprintf('<bg=red>CONTROLLER CLASS MISSING</> %s', $specControllerClass, $indentLevel));
+                                $this->lineOut(sprintf('<bg=red>CONTROLLER CLASS MISSING</> %s', $specControllerClass, $indentLevel));
                                 $nErrors++;
                             }
-                            
-                            if (($definedHandlers[sprintf('%s|%s',$httpMethod,$path)]["controllerClass"] ?? "") == $specControllerClass) {
-                                $this->lineOut( sprintf('<bg=green>CONTROLLER CLASS SET AS HANDLER</> %s', $specControllerClass, $indentLevel));
+
+                            if (($definedHandlers[sprintf('%s|%s', $httpMethod, $path)]["controllerClass"] ?? "") == $specControllerClass) {
+                                $this->lineOut(sprintf('<bg=green>CONTROLLER CLASS SET AS HANDLER</> %s', $specControllerClass, $indentLevel));
                             } else {
-                                $this->lineOut( sprintf('<bg=red>CONTROLLER CLASS NOT SET AS HANDLER</> %s', $specControllerClass, $indentLevel));
+                                $this->lineOut(sprintf('<bg=red>CONTROLLER CLASS NOT SET AS HANDLER</> %s', $specControllerClass, $indentLevel));
                                 $nErrors++;
                             }
 
@@ -180,47 +190,54 @@ class ValidateAPI extends Command
                             if (array_key_exists('x-controllerMethod', $actionspec)) {
                                 $indentLevel++;
                                 $specControllerMethod = $actionspec['x-controllerMethod'];
-                                if (method_exists(CONTROLLER_NAMESPACE_PREFIX.$specControllerClass,$specControllerMethod)) {
-                                    $this->lineOut( sprintf('<bg=green>CONTROLLER CLASS HAS METHOD</> %s', $specControllerMethod, $indentLevel));
+                                if (method_exists(CONTROLLER_NAMESPACE_PREFIX . $specControllerClass, $specControllerMethod)) {
+                                    $this->lineOut(sprintf('<bg=green>CONTROLLER CLASS HAS METHOD</> %s', $specControllerMethod, $indentLevel));
                                 } else {
-                                    $this->lineOut( sprintf('<bg=red>CONTROLLER MISSES METHOD</> %s', $specControllerMethod, $indentLevel));
+                                    $this->lineOut(sprintf('<bg=red>CONTROLLER MISSES METHOD</> %s', $specControllerMethod, $indentLevel));
                                     $nErrors++;
                                 }
-                                if (($definedHandlers[sprintf('%s|%s',$httpMethod,$path)]["controllerMethod"] ?? "") == $specControllerMethod) {
-                                    $this->lineOut( sprintf('<bg=green>CONTROLLER METHOD SET AS HANDLER</> %s', $specControllerMethod, $indentLevel));
+                                if (($definedHandlers[sprintf('%s|%s', $httpMethod, $path)]["controllerMethod"] ?? "") == $specControllerMethod) {
+                                    $this->lineOut(sprintf('<bg=green>CONTROLLER METHOD SET AS HANDLER</> %s', $specControllerMethod, $indentLevel));
                                 } else {
-                                    $this->lineOut( sprintf('<bg=red>CONTROLLER METHOD NOT SET AS HANDLER</> %s', $specControllerMethod, $indentLevel));
+                                    $this->lineOut(sprintf('<bg=red>CONTROLLER METHOD NOT SET AS HANDLER</> %s', $specControllerMethod, $indentLevel));
                                     $nErrors++;
                                 }
                                 $indentLevel--;
-                            }else{
+                            } else {
                                 $nWarnings++;
                             }
                             $indentLevel--;
-                        }
-                        else{
+                        } else {
                             $nWarnings++;
                         }
-                    } 
-                    else {
-                        $this->lineOut( sprintf('<bg=red>METHOD UNDEFINED</> %s %s', $httpMethod, $path, $indentLevel));
+                    } else {
+                        $this->lineOut(sprintf('<bg=red>METHOD UNDEFINED</> %s %s', $httpMethod, $path, $indentLevel));
                         $nErrors++;
                     }
                 }
                 $indentLevel--;
-            } 
-            else {
-                $this->lineOut( sprintf('<bg=red>ROUTE UNDEFINED</> %s', $path, $indentLevel));
+            } else {
+                $this->lineOut(sprintf('<bg=red>ROUTE UNDEFINED</> %s', $path, $indentLevel));
                 $nErrors++;
             }
             $indentLevel--;
         }
-        
+
         foreach ($specs['components']['schemas'] as $schemaIdentifier => $schema) {
-            $this->lineOut(sprintf("<bg=gray>%s</>",$schemaIdentifier), $indentLevel);            
+            $this->lineOut(sprintf("<bg=gray>%s</>", $schemaIdentifier), $indentLevel);
+            if (array_key_exists("x-eloquentModel", $schema)) {
+                if (class_exists(MODEL_NAMESPACE_PREFIX . $schema['x-eloquentModel'])) {
+                    $this->lineOut(sprintf("<bg=green> MODEL CLASS EXISTS </> %s", $schema['x-eloquentModel']), $indentLevel);
+                } else {
+                    $this->lineOut(sprintf("<bg=red> MODEL CLASS MISSING </> %s", $schema['x-eloquentModel']), $indentLevel);
+                    $nErrors++;
+                }
+            }
+            foreach ($schema['properties'] as $property => $propertyObject) {
+                $this->lineOut(sprintf("<bg=gray>%s</>", $property), 2);
+            }
         }
-        
-        $indentLevel=0;
-        $this->lineOut(sprintf('Finished: <fg=red>%d</> errors | <fg=yellow>%d</> warnings',$nErrors,$nWarnings, $indentLevel));
+        $indentLevel = 0;
+        $this->lineOut(sprintf('Finished: <fg=red>%d</> errors | <fg=yellow>%d</> warnings', $nErrors, $nWarnings, $indentLevel));
     }
 }

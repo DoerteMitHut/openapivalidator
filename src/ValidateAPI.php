@@ -33,9 +33,9 @@ class ValidateAPI extends Command
         return str_repeat('  ',self::$indentLevel) . $value;
     }
 
-    private function lineOut($value, $indent = 0)
+    private function lineOut($value)
     {
-        $this->line($this->indent($indent, $value));
+        $this->line($this->indent($value));
     }
 
     private function pushToArray(&$array, $key, $value)

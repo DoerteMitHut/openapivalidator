@@ -66,28 +66,15 @@ class ValidateAPI extends Command
         $this->lineOut('<bg=yellow> ending Route Block</>');
     }
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
-    {
-        define("CONTROLLER_USE_PATTERN", "{use App\\\Http\\\Controllers\\\(.*Controller)}");
-        define("ROUTE_DEFINITION_PATTERN", "{Route::(post|get|update|delete)\('([^']*)', \[([a-zA-Z]*)::class, '([^']*)'\]\);}");
-        define("CONTROLLER_NAMESPACE_PREFIX", "App\\Http\\Controllers\\");
-        define("MODEL_NAMESPACE_PREFIX", "App\\Models\\");
-        define("API_FILE_PATH", "./routes/api.php");
+    static private function generateOutput(){
 
-
-        $nErrors = 0;
-        $nWarnings = 0;
-
-        $indentLevel = 0;
-        $apifile = fopen(API_FILE_PATH, "r");
-        $route_blocks = [];
+    }
+    private function readRoutes(&$usedControllers,&$definedRoutes,&$definedActions,&$definedHandlers,&$indentLevel){
         $usedControllers = [];
         $definedRoutes = [];
         $definedActions = [];
         $definedHandlers = [];
+        $apifile = fopen(API_FILE_PATH, "r");
         if ($apifile) {
             $lineIndex = 0;
             self::$inBlock = false;
@@ -139,6 +126,27 @@ class ValidateAPI extends Command
             }
             fclose($apifile);
         }
+    }
+    
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        define("CONTROLLER_USE_PATTERN", "{use App\\\Http\\\Controllers\\\(.*Controller)}");
+        define("ROUTE_DEFINITION_PATTERN", "{Route::(post|get|update|delete)\('([^']*)', \[([a-zA-Z]*)::class, '([^']*)'\]\);}");
+        define("CONTROLLER_NAMESPACE_PREFIX", "App\\Http\\Controllers\\");
+        define("MODEL_NAMESPACE_PREFIX", "App\\Models\\");
+        define("API_FILE_PATH", "./routes/api.php");
+
+
+        $nErrors = 0;
+        $nWarnings = 0;
+
+        $indentLevel = 0;
+        $route_blocks = [];
+        
+        $this->readRoutes($usedControllers,$definedRoutes,$definedActions,$definedHandlers,$indentLevel);
 
         // Read the openAPI JSON file  
         $openAPIFile = file_get_contents('./config/api_spec.json');

@@ -49,12 +49,28 @@ currently, the validation checks the following:
 * check whether the controller class specified in the openAPI document via the `x-controllerClass`-property of the path opbject features a method as specified in the openAPI specification
 * check whether the controller method specified in the openAPI document via the `x-controllerMethod`-property of the httpMethod object is linked to the appropriate combination of route and http method.
 
-The following limitations occur:
+The following limitations exist:
 
-* only routes defined explicitly via the pattern 
+* only routes defined explicitly via the following pattern are registered as route definitions: 
+
 ```regex
 Route::<httpMethod>\('<route>', \[<x-controllerClass>::class, '<x-controllerMethod>'\]\);
 ```
-are registered as rute definitions.
+
+* The `<route>` in the above pattern must be identical between the openapi specs and laravel's `api.php`.
+
+* Only Controller classes from the `App\Http\Controllers` namespace are taken into account.
+
+* Only the existence of the `x-controllerMethod`on the `x-controllerClass` gets checked. The method might do nothing, be untested or do something unintended by the specification and will nonetheless be counted.
 
 ## Planned Features
+### compliance scan
+* reach coverage of all registered routes regardless of their definition syntax
+* respect an `.apivalidateignore` to exclude endpoints from being checked for or being counted.
+* check for properties on model classes to comply with schemas defined in the api specs.
+* check the database for compliance with the schema
+### codegen
+* generate missing models, controllers and migration stubs
+* create missing route definitions on the `api.php`
+* create missing methods on controller classes
+* create tests for testing framework

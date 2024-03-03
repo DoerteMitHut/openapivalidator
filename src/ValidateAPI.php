@@ -69,11 +69,13 @@ class ValidateAPI extends Command
     static private function generateOutput(){
 
     }
+
     private function readRoutes(&$usedControllers,&$definedRoutes,&$definedActions,&$definedHandlers,&$indentLevel){
         $usedControllers = [];
         $definedRoutes = [];
         $definedActions = [];
         $definedHandlers = [];
+
         $apifile = fopen(API_FILE_PATH, "r");
         if ($apifile) {
             $lineIndex = 0;
@@ -127,29 +129,9 @@ class ValidateAPI extends Command
             fclose($apifile);
         }
     }
-    
-    /**
-     * Execute the console command.
-     */
-    public function handle()
-    {
-        define("CONTROLLER_USE_PATTERN", "{use App\\\Http\\\Controllers\\\(.*Controller)}");
-        define("ROUTE_DEFINITION_PATTERN", "{Route::(post|get|update|delete)\('([^']*)', \[([a-zA-Z]*)::class, '([^']*)'\]\);}");
-        define("CONTROLLER_NAMESPACE_PREFIX", "App\\Http\\Controllers\\");
-        define("MODEL_NAMESPACE_PREFIX", "App\\Models\\");
-        define("API_FILE_PATH", "./routes/api.php");
 
-
-        $nErrors = 0;
-        $nWarnings = 0;
-
-        $indentLevel = 0;
-        $route_blocks = [];
-        
-        $this->readRoutes($usedControllers,$definedRoutes,$definedActions,$definedHandlers,$indentLevel);
-
-        // Read the openAPI JSON file  
-        $openAPIFile = file_get_contents('./config/api_spec.json');
+    private function checkAPISpec($api_spec_path,&$usedControllers,&$definedRoutes,&$definedActions,&$definedHandlers,&$indentLevel){
+        $openAPIFile = file_get_contents($api_spec_path);
         // var_dump($openAPIFile);
         // Decode the JSON file
         if (!$openAPIFile) {
@@ -245,6 +227,31 @@ class ValidateAPI extends Command
                 $this->lineOut(sprintf("<bg=gray>%s</>", $property), 2);
             }
         }
+    }
+    
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        define("CONTROLLER_USE_PATTERN", "{use App\\\Http\\\Controllers\\\(.*Controller)}");
+        define("ROUTE_DEFINITION_PATTERN", "{Route::(post|get|update|delete)\('([^']*)', \[([a-zA-Z]*)::class, '([^']*)'\]\);}");
+        define("CONTROLLER_NAMESPACE_PREFIX", "App\\Http\\Controllers\\");
+        define("MODEL_NAMESPACE_PREFIX", "App\\Models\\");
+        define("API_FILE_PATH", "./routes/api.php");
+        define("API_SPEC_PATH", "./config/api_spec.json");
+
+
+        $nErrors = 0;
+        $nWarnings = 0;
+
+        $indentLevel = 0;
+        $route_blocks = [];
+        
+        $this->readRoutes($usedControllers,$definedRoutes,$definedActions,$definedHandlers,$indentLevel);
+
+        $this->checkAPISpec(API_SPEC_PATH, $usedControllers,$definedRoutes,$definedActions,$definedHandlers,$indentLevel);
+        
         $indentLevel = 0;
         $this->lineOut(sprintf('Finished: <fg=red>%d</> errors | <fg=yellow>%d</> warnings', $nErrors, $nWarnings, $indentLevel));
     }

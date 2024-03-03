@@ -30,7 +30,7 @@ class ValidateAPI extends Command
      */
     private function indent($value)
     {
-        return str_repeat('  ') . $value;
+        return str_repeat('  ',self::$indentLevel) . $value;
     }
 
     private function lineOut($value, $indent = 0)
